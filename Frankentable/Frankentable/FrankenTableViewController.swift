@@ -9,6 +9,10 @@
 import UIKit
 
 class FrankenTableViewController: UITableViewController {
+    
+    var countDict: [String: Int] = [:]
+    var alphabetDict = [String:Int]()
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,9 +21,14 @@ class FrankenTableViewController: UITableViewController {
             let data = try? Data(contentsOf: url),
             let text = String(data: data, encoding: .utf8) {
             
+            let textArr = text.lowercased().components(separatedBy: CharacterSet.punctuationCharacters.union(CharacterSet.whitespacesAndNewlines))
+            for word in textArr {
+                countDict[word] = (countDict[word] ?? 0) + 1
+            }
+            
             // here's your text
-            print(text)
         }
+        filterAlphabetically()
     }
 
     override func didReceiveMemoryWarning() {
@@ -30,24 +39,45 @@ class FrankenTableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
+        return alphabetDict.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
+        let key = alphabetDict.keys.sorted()[section]
+        return alphabetDict[key] ?? 0
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        
+        let key = alphabetDict.keys.sorted()[indexPath.section]
+        let word = self.countDict.keys.filter {$0.hasPrefix(key)}.sorted()[indexPath.row]
 
-        // Configure the cell...
-
+        cell.textLabel?.text = "\(word): \(self.countDict[word] ?? 0)"
+        
         return cell
     }
-    */
+    
+    func filterAlphabetically () {
+        let alphabet = "q w e r t y u i o p a s d f g h j k l z x c v b n m".components(separatedBy: " ")
+        for letter in alphabet {
+            let count = self.countDict.filter {$0.key.hasPrefix(letter)} .count
+            print(self.countDict.filter {$0.key.hasPrefix(letter)})
+            print(letter, count)
+            let check = count > 0
+            self.alphabetDict[letter] = check ? count : nil
+        }
+    }
+    
+    func filterNumerically () {
+        
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        let key = alphabetDict.keys.sorted()[section]
+        return key.uppercased()
+    }
 
     /*
     // Override to support conditional editing of the table view.
